@@ -1,5 +1,7 @@
-import { useLocation } from "react-router-dom";
+
 import { useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,13 +14,36 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-edu-light p-6">
+      <div className="w-full max-w-md text-center animate-fade-in">
+        <div className="w-24 h-24 rounded-xl bg-edu-primary/10 flex items-center justify-center mx-auto mb-6">
+          <span className="text-6xl font-bold text-edu-primary">404</span>
+        </div>
+        
+        <h1 className="text-3xl font-bold text-edu-dark mb-4">Halaman Tidak Ditemukan</h1>
+        
+        <p className="text-lg text-edu-dark/70 mb-8">
+          Maaf, halaman yang Anda cari tidak dapat ditemukan atau telah dipindahkan.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link to="/" className="button-primary w-full sm:w-auto">
+            <span className="flex items-center justify-center">
+              <Home className="w-4 h-4 mr-2" />
+              Kembali ke Beranda
+            </span>
+          </Link>
+          
+          <button 
+            onClick={() => window.history.back()}
+            className="button-secondary w-full sm:w-auto"
+          >
+            <span className="flex items-center justify-center">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Kembali
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
