@@ -21,12 +21,14 @@ const Features = () => {
   const adminFeaturesQuery = useQuery({
     queryKey: ["adminFeatures"],
     queryFn: getAdminFeatures,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Gagal memuat fitur admin, silakan coba lagi nanti.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Gagal memuat fitur admin, silakan coba lagi nanti.",
+          variant: "destructive",
+        });
+      },
     },
   });
 
@@ -34,12 +36,14 @@ const Features = () => {
   const studentFeaturesQuery = useQuery({
     queryKey: ["studentFeatures"],
     queryFn: getStudentFeatures,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Gagal memuat fitur siswa, silakan coba lagi nanti.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Gagal memuat fitur siswa, silakan coba lagi nanti.",
+          variant: "destructive",
+        });
+      },
     },
   });
 
