@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import SubjectFeatures from '../components/SubjectFeatures';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { formatBoldText } from '../utils/textFormatting';
 
 const Subjects = () => {
   return (
