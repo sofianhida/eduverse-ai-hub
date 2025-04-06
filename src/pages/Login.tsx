@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, LogIn, UserPlus, ArrowLeft, User, School } from 'lucide-react';
+import { Eye, EyeOff, LogIn, UserPlus, ArrowLeft, User, School, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { supabase } from '../integrations/supabase/client';
+import { supabase, checkSupabaseConnection } from '../integrations/supabase/client';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState<'student' | 'teacher'>('student');
   const [isLoading, setIsLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   useEffect(() => {
     // Check if register parameter is in URL
@@ -26,17 +27,39 @@ const Login = () => {
 
     // Check if user is already logged in
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      }
+    };
+    
+    // Check Supabase connection
+    const verifyConnection = async () => {
+      const connectionStatus = await checkSupabaseConnection();
+      if (!connectionStatus.connected) {
+        setConnectionError(connectionStatus.error || 'Koneksi ke server gagal. Silakan coba lagi nanti.');
+      } else {
+        setConnectionError(null);
       }
     };
     
     checkSession();
+    verifyConnection();
   }, [location, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Verify connection before attempting auth
+    if (connectionError) {
+      toast.error('Tidak dapat terhubung ke server. Silakan coba lagi nanti.');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -70,6 +93,7 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast.error(error.message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
@@ -78,6 +102,11 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      if (connectionError) {
+        toast.error('Tidak dapat terhubung ke server. Silakan coba lagi nanti.');
+        return;
+      }
+      
       setIsLoading(true);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -88,6 +117,7 @@ const Login = () => {
       
       if (error) throw error;
     } catch (error: any) {
+      console.error("Google login error:", error);
       toast.error(error.message || 'Gagal login dengan Google. Silakan coba lagi.');
       setIsLoading(false);
     }
@@ -102,6 +132,18 @@ const Login = () => {
           <span>Kembali ke Beranda</span>
         </Link>
       </div>
+
+      {/* Connection Error Alert */}
+      {connectionError && (
+        <div className="px-6">
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>
+              {connectionError}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Left Side - Form */}
@@ -121,6 +163,7 @@ const Login = () => {
               </p>
             </div>
 
+            {/* Form Content */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {isRegister && (
                 <div>
@@ -223,7 +266,7 @@ const Login = () => {
               <button
                 type="submit"
                 className="button-primary w-full flex items-center justify-center"
-                disabled={isLoading}
+                disabled={isLoading || !!connectionError}
               >
                 {isLoading ? (
                   <LoadingSpinner size="small" />
@@ -250,7 +293,7 @@ const Login = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center gap-2 rounded-lg border border-edu-dark/10 bg-white px-4 py-3 text-edu-dark hover:bg-edu-primary/5 transition-colors"
-                disabled={isLoading}
+                disabled={isLoading || !!connectionError}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.64 9.20455C17.64 8.56637 17.5827 7.95273 17.4764 7.36364H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8196H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20455Z" fill="#4285F4"/>

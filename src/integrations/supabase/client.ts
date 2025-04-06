@@ -3,13 +3,28 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Supabase configuration
 const SUPABASE_URL = "https://jvmgbkimgyzihfcwkmkf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2bWdia2ltZ3l6aWhmY3drbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0NjA3NDMsImV4cCI6MjA1ODAzNjc0M30.5hFh3TAxFarLJISvrc4J9E_pJLzNM5GONGAFX3_U_2M";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Create Supabase client with configuration options
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  },
+  global: {
+    headers: {
+      'x-application-name': 'eduverse-ai'
+    }
+  }
+});
 
 // Helper function to get features for admin/teacher module
 export const getAdminFeatures = async () => {
@@ -40,5 +55,16 @@ export const getStudentFeatures = async () => {
   } catch (error) {
     console.error('Error fetching student features:', error);
     return [];
+  }
+};
+
+// Add debug function to check connection status
+export const checkSupabaseConnection = async () => {
+  try {
+    const { error } = await supabase.from('admin_features').select('count', { count: 'exact' });
+    return { connected: !error, error: error ? error.message : null };
+  } catch (err) {
+    console.error('Supabase connection check failed:', err);
+    return { connected: false, error: err instanceof Error ? err.message : 'Unknown error' };
   }
 };
