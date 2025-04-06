@@ -6,17 +6,18 @@ import React from 'react';
  * Example: "This is **bold** text" becomes "This is <strong>bold</strong> text"
  */
 export const formatBoldText = (text: string): React.ReactNode[] => {
-  if (!text.includes('**')) {
+  if (!text || !text.includes('**')) {
     return [text];
   }
 
-  const parts = text.split('**');
+  const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, index) => {
-    // Even indices are regular text, odd indices are bold text
-    if (index % 2 === 0) {
-      return part;
+    if (part.startsWith('**') && part.endsWith('**')) {
+      // Extract content between ** and make it bold
+      const boldContent = part.substring(2, part.length - 2);
+      return <strong key={index}>{boldContent}</strong>;
     } else {
-      return <strong key={index}>{part}</strong>;
+      return part;
     }
   });
 };

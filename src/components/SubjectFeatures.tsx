@@ -1,19 +1,36 @@
 
 import React, { useEffect, useState } from 'react';
-import { getSubjectFeatures } from '../integrations/supabase/client';
+import { getSubjectsByLevel } from '../integrations/supabase/client';
 import { formatBoldText } from '../utils/textFormatting';
 import { useToast } from '@/hooks/use-toast';
 import LoadingSpinner from './LoadingSpinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Check, AlertCircle } from 'lucide-react';
 
-const SubjectFeatures = () => {
-  const [subjects, setSubjects] = useState<any[]>([]);
+interface SubjectFeaturesProps {
+  activeTab?: string;
+}
+
+interface Subject {
+  id: number;
+  name: string;
+  level: string;
+  phase: string;
+  description: string;
+  isRequired: boolean;
+  category?: string;
+}
+
+const SubjectFeatures: React.FC<SubjectFeaturesProps> = ({ activeTab = 'sd' }) => {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchSubjects = async () => {
+      setLoading(true);
       try {
-        const data = await getSubjectFeatures();
+        const data = await getSubjectsByLevel(activeTab);
         setSubjects(data);
       } catch (error) {
         console.error('Error fetching subjects:', error);
@@ -28,64 +45,191 @@ const SubjectFeatures = () => {
     };
 
     fetchSubjects();
-  }, [toast]);
+  }, [activeTab, toast]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" text="Memuat mata pelajaran..." />
       </div>
     );
   }
 
-  return (
-    <section className="py-16 bg-edu-light">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="inline-block px-4 py-2 bg-edu-secondary rounded-full text-edu-primary font-medium text-sm mb-4">
-            Mata Pelajaran
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Pembelajaran Interaktif dengan AI
-          </h2>
-          <p className="text-lg text-edu-dark/80">
-            Jelajahi berbagai mata pelajaran dengan bantuan AI yang menyesuaikan dengan gaya belajar dan kebutuhan Anda
-          </p>
+  // Group subjects by category for SMA
+  const getGroupedSubjects = () => {
+    if (activeTab !== 'sma') return null;
+    
+    // First filter for required subjects
+    const requiredSubjects = subjects.filter(subject => subject.isRequired);
+    
+    // Then group optional subjects by category
+    const optionalSubjectsByCategory: Record<string, Subject[]> = {};
+    subjects
+      .filter(subject => !subject.isRequired)
+      .forEach(subject => {
+        const category = subject.category || 'Lainnya';
+        if (!optionalSubjectsByCategory[category]) {
+          optionalSubjectsByCategory[category] = [];
+        }
+        optionalSubjectsByCategory[category].push(subject);
+      });
+      
+    return { requiredSubjects, optionalSubjectsByCategory };
+  };
+
+  const renderElementarySubjects = () => {
+    return (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mata Pelajaran</TableHead>
+              <TableHead>Fase</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Deskripsi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {subjects.map((subject) => (
+              <TableRow key={subject.id}>
+                <TableCell className="font-medium">{formatBoldText(subject.name)}</TableCell>
+                <TableCell>{subject.phase}</TableCell>
+                <TableCell>
+                  {subject.isRequired ? (
+                    <span className="flex items-center text-green-600">
+                      <Check className="w-4 h-4 mr-1" /> Wajib
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-blue-600">
+                      <AlertCircle className="w-4 h-4 mr-1" /> Pilihan
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="hidden md:table-cell max-w-md">{formatBoldText(subject.description)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  const renderJuniorHighSubjects = () => {
+    return (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mata Pelajaran</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Deskripsi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {subjects.map((subject) => (
+              <TableRow key={subject.id}>
+                <TableCell className="font-medium">{formatBoldText(subject.name)}</TableCell>
+                <TableCell>
+                  {subject.isRequired ? (
+                    <span className="flex items-center text-green-600">
+                      <Check className="w-4 h-4 mr-1" /> Wajib
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-blue-600">
+                      <AlertCircle className="w-4 h-4 mr-1" /> Pilihan
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="hidden md:table-cell max-w-md">{formatBoldText(subject.description)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  const renderSeniorHighSubjects = () => {
+    const groupedData = getGroupedSubjects();
+    if (!groupedData) return null;
+    
+    const { requiredSubjects, optionalSubjectsByCategory } = groupedData;
+    
+    return (
+      <div className="space-y-8">
+        <div>
+          <h3 className="text-xl font-bold mb-4">Mata Pelajaran Wajib</h3>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mata Pelajaran</TableHead>
+                  <TableHead className="hidden md:table-cell">Deskripsi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {requiredSubjects.map((subject) => (
+                  <TableRow key={subject.id}>
+                    <TableCell className="font-medium">{formatBoldText(subject.name)}</TableCell>
+                    <TableCell className="hidden md:table-cell max-w-md">{formatBoldText(subject.description)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {subjects.map((subject) => (
-            <div 
-              key={subject.id} 
-              className="bg-white rounded-xl shadow-soft border border-edu-primary/10 p-6 hover:shadow-medium transition-all duration-300 hover:border-edu-primary/30"
-            >
-              <div className="flex items-center mb-4">
-                <div className={`w-12 h-12 rounded-full bg-${subject.color}-500/20 flex items-center justify-center mr-4 text-${subject.color}-600 text-xl font-bold`}>
-                  {subject.symbol}
-                </div>
-                <h3 className="text-xl font-bold">{subject.title}</h3>
-              </div>
-              
-              <p className="text-edu-dark/70">
-                {formatBoldText(subject.description)}
-              </p>
-
-              <div className="mt-5 pt-4 border-t border-edu-primary/10">
-                <button className="flex items-center text-edu-primary font-medium hover:text-edu-primary/80 transition-colors">
-                  <span>Jelajahi</span>
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+        
+        <div>
+          <h3 className="text-xl font-bold mb-4">Mata Pelajaran Pilihan</h3>
+          {Object.keys(optionalSubjectsByCategory).map(category => (
+            <div key={category} className="mb-6">
+              <h4 className="text-lg font-semibold mb-3">Kelompok {category}</h4>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Mata Pelajaran</TableHead>
+                      <TableHead className="hidden md:table-cell">Deskripsi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {optionalSubjectsByCategory[category].map((subject) => (
+                      <TableRow key={subject.id}>
+                        <TableCell className="font-medium">{formatBoldText(subject.name)}</TableCell>
+                        <TableCell className="hidden md:table-cell max-w-md">{formatBoldText(subject.description)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
 
-        <div className="mt-12 text-center">
-          <button className="px-6 py-3 bg-edu-primary text-white rounded-lg hover:bg-edu-primary/90 transition-colors shadow-soft">
-            Lihat Semua Mata Pelajaran
-          </button>
+  return (
+    <section className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <span className="inline-block px-4 py-2 bg-edu-secondary rounded-full text-edu-primary font-medium text-sm mb-4">
+            {activeTab === 'sd' ? 'Sekolah Dasar' : activeTab === 'smp' ? 'Sekolah Menengah Pertama' : 'Sekolah Menengah Atas'}
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Daftar Mata Pelajaran {activeTab.toUpperCase()}
+          </h2>
+          <p className="text-lg text-edu-dark/80">
+            {activeTab === 'sd' && 'Mata pelajaran untuk jenjang Sekolah Dasar (SD) yang dibagi dalam Fase A, B, dan C'}
+            {activeTab === 'smp' && 'Mata pelajaran untuk jenjang Sekolah Menengah Pertama (SMP) pada Fase D'}
+            {activeTab === 'sma' && 'Mata pelajaran untuk jenjang Sekolah Menengah Atas (SMA) pada Fase E dan F'}
+          </p>
+        </div>
+
+        <div className="max-w-6xl mx-auto">
+          {activeTab === 'sd' && renderElementarySubjects()}
+          {activeTab === 'smp' && renderJuniorHighSubjects()}
+          {activeTab === 'sma' && renderSeniorHighSubjects()}
         </div>
       </div>
     </section>
