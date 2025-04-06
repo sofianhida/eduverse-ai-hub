@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import SubjectFeatures from '../components/SubjectFeatures';
-import AIScheduler from '../components/AIScheduler';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import { formatBoldText } from '../utils/textFormatting';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
 
 const Subjects = () => {
   const [activeTab, setActiveTab] = useState("sd");
@@ -98,11 +98,53 @@ const Subjects = () => {
         {/* Subject List by Level */}
         <SubjectFeatures activeTab={activeTab} />
         
-        {/* AI Scheduler */}
-        <AIScheduler activeTab={activeTab as 'sd' | 'smp' | 'sma'} />
+        {/* Schedule Link Section */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <span className="inline-block px-4 py-2 bg-edu-secondary rounded-full text-edu-primary font-medium text-sm mb-4">
+                Teknologi AI
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Sistem AI untuk Penyusunan Jadwal
+              </h2>
+              <p className="text-lg text-edu-dark/80 mb-8">
+                Gunakan teknologi AI untuk membantu menyusun jadwal pelajaran yang optimal sesuai Kurikulum Merdeka
+              </p>
+              
+              <div className="bg-edu-light p-6 rounded-xl shadow-sm">
+                <h3 className="text-xl font-semibold mb-4">Keunggulan Penjadwalan dengan AI:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-white p-4 rounded-lg">
+                    <p className="font-medium">Kecepatan</p>
+                    <p className="text-sm text-edu-dark/70">Menyusun jadwal dalam hitungan detik</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg">
+                    <p className="font-medium">Tanpa Konflik</p>
+                    <p className="text-sm text-edu-dark/70">Menghilangkan bentrokan jadwal</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg">
+                    <p className="font-medium">Adaptif</p>
+                    <p className="text-sm text-edu-dark/70">Cepat menyesuaikan perubahan</p>
+                  </div>
+                </div>
+                
+                <Link to="/schedule">
+                  <Button 
+                    size="lg"
+                    className="flex items-center gap-2 mx-auto"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    Buat Jadwal dengan AI
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
         
         {/* Future Plans Section */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-edu-light">
           <div className="container mx-auto px-4">
             <div className="text-center max-w-3xl mx-auto mb-12">
               <span className="inline-block px-4 py-2 bg-edu-secondary rounded-full text-edu-primary font-medium text-sm mb-4">
