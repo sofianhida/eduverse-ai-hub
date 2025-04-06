@@ -100,10 +100,95 @@ export const getStudentFeatures = async () => {
 // Function to check Supabase connection status
 export const checkSupabaseConnection = async () => {
   try {
-    const { error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
+    // Using a more type-safe approach that won't cause TypeScript errors
+    const { error } = await supabase.auth.getSession();
     return { connected: !error, error: error ? error.message : null };
   } catch (err) {
     console.error('Supabase connection check failed:', err);
     return { connected: false, error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+};
+
+// Helper function to get subject features 
+export const getSubjectFeatures = async () => {
+  try {
+    // For now, return mock data since the table might not exist yet
+    return [
+      {
+        id: '1',
+        title: 'Matematika',
+        description: 'Pelajari **konsep aljabar**, **geometri**, dan **statistik** dengan cara yang interaktif dan menyenangkan',
+        icon_name: 'PiMath',
+        symbol: '∑',
+        color: 'purple',
+        display_order: 1
+      },
+      {
+        id: '2',
+        title: 'Fisika',
+        description: '**Eksperimen virtual** dan simulasi untuk memahami **hukum-hukum fisika** dengan lebih baik',
+        icon_name: 'Flask',
+        symbol: 'φ',
+        color: 'blue',
+        display_order: 2
+      },
+      {
+        id: '3',
+        title: 'Kimia',
+        description: 'Visualisasi **reaksi kimia** dan **struktur molekul** untuk pemahaman yang lebih mendalam',
+        icon_name: 'Vial',
+        symbol: '⚗️',
+        color: 'green',
+        display_order: 3
+      },
+      {
+        id: '4',
+        title: 'Biologi',
+        description: 'Jelajahi **struktur sel**, **genetika**, dan **ekosistem** dengan model 3D interaktif',
+        icon_name: 'Dna',
+        symbol: '🧬',
+        color: 'red',
+        display_order: 4
+      },
+      {
+        id: '5',
+        title: 'Bahasa Indonesia',
+        description: 'Tingkatkan kemampuan **menulis**, **membaca**, dan **menganalisis teks** dengan AI tutor',
+        icon_name: 'Languages',
+        symbol: 'Aa',
+        color: 'orange',
+        display_order: 5
+      },
+      {
+        id: '6',
+        title: 'Bahasa Inggris',
+        description: 'Latih **percakapan**, **tata bahasa**, dan **kosakata** dengan partner AI yang responsif',
+        icon_name: 'Globe',
+        symbol: 'Bb',
+        color: 'cyan',
+        display_order: 6
+      },
+      {
+        id: '7',
+        title: 'Sejarah',
+        description: 'Jelajahi **peristiwa sejarah** dengan rekonstruksi interaktif dan **peta kronologi**',
+        icon_name: 'Landmark',
+        symbol: '🏛️',
+        color: 'amber',
+        display_order: 7
+      },
+      {
+        id: '8',
+        title: 'Geografi',
+        description: 'Pelajari tentang **bentuk bumi**, **iklim**, dan **budaya** dengan peta interaktif',
+        icon_name: 'MapPin',
+        symbol: '🌍',
+        color: 'teal',
+        display_order: 8
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching subject features:', error);
+    return [];
   }
 };

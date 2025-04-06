@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -8,6 +7,7 @@ import {
   HelpCircle, FileText
 } from 'lucide-react';
 import AIChat from '../components/AIChat';
+import { formatBoldText } from '../utils/textFormatting';
 
 const subjects = [
   { id: 'math', name: 'Matematika', icon: <div className="text-purple-500">∑</div> },
@@ -28,7 +28,6 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex flex-col bg-edu-light">
-      {/* Header */}
       <header className="bg-white border-b border-edu-primary/10 shadow-soft z-20">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="flex items-center">
@@ -63,7 +62,6 @@ const Dashboard = () => {
       </header>
       
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
         <aside 
           className={`bg-white border-r border-edu-primary/10 transition-all duration-300 ${
             isSidebarOpen ? 'w-64' : 'w-0 -translate-x-full lg:translate-x-0 lg:w-20'
@@ -87,7 +85,7 @@ const Dashboard = () => {
                 )}
                 
                 <Link
-                  to="/courses"
+                  to="/subjects"
                   className="flex items-center p-3 rounded-lg hover:bg-edu-primary/5 text-edu-dark"
                 >
                   <BookOpen className="w-5 h-5" />
@@ -166,7 +164,6 @@ const Dashboard = () => {
           </div>
         </aside>
         
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto bg-edu-light">
           <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold text-edu-dark mb-6">
@@ -174,7 +171,6 @@ const Dashboard = () => {
             </h1>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Subject Selection */}
               <div className="lg:col-span-1 space-y-6">
                 <div className="bg-white rounded-xl p-6 shadow-soft border border-edu-primary/10">
                   <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -200,6 +196,15 @@ const Dashboard = () => {
                       </button>
                     ))}
                   </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-edu-primary/10">
+                    <Link
+                      to="/subjects"
+                      className="flex items-center justify-center w-full p-2 bg-edu-primary/5 rounded-lg text-edu-primary hover:bg-edu-primary/10 transition-colors"
+                    >
+                      <span>Lihat Semua Mata Pelajaran</span>
+                    </Link>
+                  </div>
                 </div>
                 
                 <div className="bg-white rounded-xl p-6 shadow-soft border border-edu-primary/10">
@@ -210,31 +215,30 @@ const Dashboard = () => {
                   
                   <div className="space-y-3 text-sm text-edu-dark/80">
                     <p>
-                      AI Tutor dapat membantu Anda mempelajari konsep-konsep sulit, menjawab pertanyaan,
+                      AI Tutor dapat membantu Anda mempelajari {formatBoldText("**konsep-konsep sulit**")}, menjawab pertanyaan,
                       dan memberikan latihan soal sesuai dengan kurikulum Indonesia.
                     </p>
                     
                     <div className="mt-4 space-y-2">
                       <div className="flex items-start">
                         <BrainCircuit className="w-4 h-4 text-edu-primary mt-0.5 mr-2" />
-                        <p>Tanyakan konsep yang ingin Anda pahami</p>
+                        <p>Tanyakan {formatBoldText("**konsep**")} yang ingin Anda pahami</p>
                       </div>
                       
                       <div className="flex items-start">
                         <MessageSquare className="w-4 h-4 text-edu-primary mt-0.5 mr-2" />
-                        <p>Diskusikan soal-soal yang sulit</p>
+                        <p>Diskusikan {formatBoldText("**soal-soal yang sulit**")}</p>
                       </div>
                       
                       <div className="flex items-start">
                         <FileText className="w-4 h-4 text-edu-primary mt-0.5 mr-2" />
-                        <p>Minta penjelasan langkah demi langkah</p>
+                        <p>Minta {formatBoldText("**penjelasan langkah demi langkah**")}</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Chat Interface */}
               <div className="lg:col-span-2 h-[calc(100vh-220px)]">
                 <AIChat 
                   chatTitle={`AI Tutor ${selectedSubject.name}`}
