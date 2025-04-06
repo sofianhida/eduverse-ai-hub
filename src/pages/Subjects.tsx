@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import SubjectFeatures from '../components/SubjectFeatures';
+import AIScheduler from '../components/AIScheduler';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { formatBoldText } from '../utils/textFormatting';
@@ -96,6 +97,9 @@ const Subjects = () => {
 
         {/* Subject List by Level */}
         <SubjectFeatures activeTab={activeTab} />
+        
+        {/* AI Scheduler */}
+        <AIScheduler activeTab={activeTab as 'sd' | 'smp' | 'sma'} />
         
         {/* Future Plans Section */}
         <section className="py-16 bg-white">
